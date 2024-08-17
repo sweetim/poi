@@ -1,0 +1,52 @@
+{
+  "name": "dapp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "pregenerate": "rm abis/* && find ../contract/artifacts-zk/contracts -type f -name \"*.json\" ! -name \"*.dbg.json\" | xargs -I{} cp {} ./abis",
+    "generate": "npx wagmi generate"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.7",
+    "@tanstack/react-query": "^5.51.1",
+    "@uidotdev/usehooks": "^2.4.1",
+    "@vis.gl/react-google-maps": "^1.1.0",
+    "@web3auth/base": "^8.8.0",
+    "@web3auth/ethereum-provider": "^8.10.2",
+    "@web3auth/metamask-adapter": "^8.8.0",
+    "@web3auth/modal": "^8.10.2",
+    "@web3auth/modal-react-hooks": "^8.10.2",
+    "@web3auth/wallet-services-plugin-react-hooks": "^8.10.2",
+    "antd": "^5.19.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.24.1",
+    "ts-pattern": "^5.2.0",
+    "viem": "^2.17.4",
+    "wagmi": "^2.10.10"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "@wagmi/cli": "^2.1.15",
+    "autoprefixer": "^10.4.19",
+    "buffer": "^6.0.3",
+    "empty-module": "^0.0.2",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "postcss": "^8.4.39",
+    "process": "^0.11.10",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1"
+  }
+}
