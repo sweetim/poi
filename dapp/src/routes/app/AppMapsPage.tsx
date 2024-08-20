@@ -1,6 +1,5 @@
 import { googleMapStyle } from "@/config/googleMapStyle"
 import { PoI } from "@/contract"
-import { useGeolocation } from "@uidotdev/usehooks"
 import {
   Map,
   Marker,
@@ -15,9 +14,9 @@ const DEFAULT_LOCATION = {
 }
 
 const AppMapsPage = () => {
-  const { latitude, longitude } = useGeolocation({
-    enableHighAccuracy: true,
-  })
+  // const { latitude, longitude } = useGeolocation({
+  //   enableHighAccuracy: true,
+  // })
 
   const poi: PoI[] = [
     {

@@ -11,7 +11,6 @@ const LandingPage: FC = () => {
 
   const {
     isConnected,
-    connect,
   } = useWeb3Auth()
 
   useEffect(() => {
