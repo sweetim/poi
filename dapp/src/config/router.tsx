@@ -1,15 +1,33 @@
+import { ProtectedRoute } from "@/modules/common"
 import {
   AppRootPage,
   LandingPage,
   RootPage,
 } from "@/routes"
 import {
+  AppCreatePage,
   AppMapsPage,
+  AppPoiBookmarkPage,
+  AppPoiByIdPage,
+  AppPoiCapturePage,
+  AppPoiCompletedPage,
   AppPoiPage,
+  AppPoiRootPage,
   AppSettingsPage,
   AppWalletPage,
 } from "@/routes/app"
-import { createBrowserRouter } from "react-router-dom"
+import {
+  createBrowserRouter,
+  Navigate,
+} from "react-router-dom"
+
+export type PoiByIdPageParams = {
+  id: string
+}
+
+const poiByIdPageLoader = async ({ params }: any) => {
+  return params as PoiByIdPageParams
+}
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +40,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "/app",
-        element: <AppRootPage />,
+        element: (
+          <ProtectedRoute>
+            <AppRootPage />
+          </ProtectedRoute>
+        ),
         children: [
           {
             path: "",
@@ -30,7 +52,40 @@ export const router = createBrowserRouter([
           },
           {
             path: "poi",
-            element: <AppPoiPage />,
+            element: <AppPoiRootPage />,
+            children: [
+              {
+                path: "",
+                element: <AppPoiPage />,
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to={"bookmark"} />,
+                  },
+                  {
+                    path: "bookmark",
+                    element: <AppPoiBookmarkPage />,
+                  },
+                  {
+                    path: "completed",
+                    element: <AppPoiCompletedPage />,
+                  },
+                ],
+              },
+              {
+                path: "id/:id",
+                element: <AppPoiByIdPage />,
+                loader: poiByIdPageLoader,
+              },
+              {
+                path: "capture",
+                element: <AppPoiCapturePage />,
+              },
+            ],
+          },
+          {
+            path: "create",
+            element: <AppCreatePage />,
           },
           {
             path: "wallet",

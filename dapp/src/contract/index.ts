@@ -1,9 +1,12 @@
 export const CONTRACT_DECIMAL_UNITS = 6
 
+export const POI_TOKEN_ADDRESS = import.meta.env.VITE_POI_TOKEN_ADDRESS
+export const POI_ADDRESS = import.meta.env.VITE_POI_ADDRESS
+
 export type PoIOnChain = {
   id: bigint
   owner: string
-  createdAt: bigint
+  createdAt_s: bigint
   lat: bigint
   lng: bigint
   reward: bigint
@@ -13,7 +16,8 @@ export type PoIOnChain = {
 export type PoI = {
   id: number
   owner: string
-  createdAt: number
+  created: number
+  createdAt_s: number
   lat: number
   lng: number
   reward: number
@@ -26,7 +30,8 @@ export function convertToPoI(chainPoI: PoIOnChain): PoI {
   return {
     id: Number(chainPoI.id),
     owner: chainPoI.owner,
-    createdAt: Number(chainPoI.createdAt),
+    created: 1,
+    createdAt_s: Number(chainPoI.createdAt_s),
     lat: convertToNumber(chainPoI.lat),
     lng: convertToNumber(chainPoI.lng),
     reward: Number(chainPoI.reward),

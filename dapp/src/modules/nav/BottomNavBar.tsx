@@ -34,7 +34,7 @@ const navBarItems: NavBarItem[] = [
   {
     to: "/app/create",
     icon: PlusCircle,
-    title: "Add",
+    title: "Create",
   },
   {
     to: "/app/wallet",

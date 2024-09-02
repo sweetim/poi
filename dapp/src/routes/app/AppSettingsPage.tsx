@@ -26,14 +26,14 @@ const AppSettingsPage: FC = () => {
 
   const avatar = match(userInfo?.profileImage)
     .with(P.string, () => <Avatar size={128} src={userInfo?.profileImage} />)
-    .otherwise(() => <Avatar size={128} icon={<User size={64} color="#ffebeb" weight="fill" />} />)
+    .otherwise(() => <User size={128} color="#ffebeb" weight="fill" />)
 
   return (
     <div className="w-full text-center mt-20">
       <Space direction="vertical" size="large" align="center">
         {avatar}
         <Paragraph
-          style={{ width: 300, color: "white" }}
+          style={{ width: 300 }}
           ellipsis
           copyable
           className="font-bold"

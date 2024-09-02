@@ -1,0 +1,8 @@
+{
+  "zksync-era-sepolia": {
+    "contracts/Greeter.sol:Greeter": {
+      "address": "0x9Bf50009a404A950ECec066104cE4F9E757E6B83",
+      "startBlock": 3409508
+    }
+  }
+}

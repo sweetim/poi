@@ -7,9 +7,8 @@ import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider"
 import { MetamaskAdapter } from "@web3auth/metamask-adapter"
 import { Web3AuthOptions } from "@web3auth/modal"
 import { Web3AuthContextConfig } from "@web3auth/modal-react-hooks"
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin"
 import { toHex } from "viem"
-import { zkSyncInMemoryNode } from "viem/chains"
+import { zksyncInMemoryNode } from "viem/chains"
 import {
   createConfig,
   http,
@@ -17,7 +16,7 @@ import {
 
 const WEB3_AUTH_CLIENT_ID = import.meta.env.VITE_WEB3_AUTH_CLIENT_ID
 
-export const CHAIN_TO_USE = zkSyncInMemoryNode
+export const CHAIN_TO_USE = zksyncInMemoryNode
 
 const chainConfig: CustomChainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -49,19 +48,10 @@ const web3AuthOptions: Web3AuthOptions = {
   privateKeyProvider: privateKeyProvider,
 }
 
-const walletServicesPlugin = new WalletServicesPlugin({
-  wsEmbedOpts: {},
-  walletInitOptions: {
-    whiteLabel: {
-      showWidgetButton: true,
-    },
-  },
-})
-
 export const web3AuthProviderContextConfig: Web3AuthContextConfig = {
   web3AuthOptions,
   adapters: [ metamaskAdapter ],
-  plugins: [ walletServicesPlugin ],
+  // plugins: [ walletServicesPlugin ],
   // plugins: [],
 }
 

@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "pregenerate": "rm abis/* && find ../contract/artifacts-zk/contracts -type f -name \"*.json\" ! -name \"*.dbg.json\" | xargs -I{} cp {} ./abis",
+    "pregenerate": "rm abis/* -f && find ../contract/artifacts-zk/contracts -type f -name \"*.json\" ! -name \"*.dbg.json\" | xargs -I{} cp {} ./abis",
     "generate": "npx wagmi generate"
   },
   "dependencies": {
@@ -23,12 +23,18 @@
     "@web3auth/modal-react-hooks": "^8.10.2",
     "@web3auth/wallet-services-plugin-react-hooks": "^8.10.2",
     "antd": "^5.19.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "immer": "^10.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.24.1",
+    "react-webcam": "^7.2.0",
+    "swiper": "^11.1.11",
     "ts-pattern": "^5.2.0",
     "viem": "^2.17.4",
-    "wagmi": "^2.10.10"
+    "wagmi": "^2.10.10",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

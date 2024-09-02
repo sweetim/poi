@@ -1,0 +1,10 @@
+type GreetingResetUser @entity(immutable: true) {
+  id: Bytes!
+  sender: Bytes! # address
+}
+
+type SetGreeting @entity(immutable: true) {
+  id: Bytes!
+  sender: Bytes! # address
+  greeting: String
+}

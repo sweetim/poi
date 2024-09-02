@@ -11,6 +11,7 @@ const LandingPage: FC = () => {
 
   const {
     isConnected,
+    connect,
   } = useWeb3Auth()
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const LandingPage: FC = () => {
   }, [ isConnected ])
 
   async function loginClickHandler() {
-    // await connect()
+    await connect()
     navigate("/app")
   }
 

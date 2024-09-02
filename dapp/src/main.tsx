@@ -12,7 +12,7 @@ import { router } from "./config/router"
 import {
   wagmiConfig,
   web3AuthProviderContextConfig,
-} from "./config/web3auth"
+} from "./config/web3Auth"
 import "./index.css"
 
 const queryClient = new QueryClient()

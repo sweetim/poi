@@ -24,7 +24,7 @@ export default function AppWalletPage() {
                 title={item.name}
                 description={item.description}
               />
-              <h2 className="text-xl font-bold">{item.amount.toLocaleString()}</h2>
+              <h2 className="text-xl font-bold">{item.amount?.toLocaleString()}</h2>
             </List.Item>
           )}
         />

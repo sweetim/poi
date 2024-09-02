@@ -12,9 +12,25 @@ contract POI {
         uint createdAt;
         uint lat;
         uint lng;
-        uint reward;
         string description;
         bool isCompleted;
+    }
+
+    struct POIContributorMetadata {
+        address contributor;
+        string cid;
+        uint contributedAt_s;
+    }
+
+    struct POIContributors {
+        uint contributorIndex;
+        mapping(uint => POIContributorMetadata) contributors;
+        uint reward;
+    }
+
+    struct POIData {
+        POIMetadata metadata;
+        POIContributors contributors;
     }
 
     struct RegisterPOIArgs {
@@ -44,5 +60,9 @@ contract POI {
         poiMetadatas[poiId].isCompleted = false;
 
         emit POIRegister(msg.sender, poiId);
+    }
+
+    function readPOIById(uint id) public view returns (POIMetadata memory) {
+        return poiMetadatas[id];
     }
 }

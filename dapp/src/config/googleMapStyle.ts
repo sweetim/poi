@@ -1,4 +1,4 @@
-export const googleMapStyle: google.maps.MapTypeStyle[] = [
+export const GOOGLE_MAP_STYLE: google.maps.MapTypeStyle[] = [
   {
     "stylers": [
       {
