@@ -1,10 +1,16 @@
-type GreetingResetUser @entity(immutable: true) {
-  id: Bytes!
-  sender: Bytes! # address
+type POIMetadata @entity {
+  id: ID!
+  owner: Bytes!
+  createdAt_s: BigInt!
+  lat: BigInt!
+  lng: BigInt!
+  description: String!
 }
 
-type SetGreeting @entity(immutable: true) {
-  id: Bytes!
-  sender: Bytes! # address
-  greeting: String
+type POIContributorMetadata @entity {
+  id: ID!
+  poiDataId: BigInt!
+  contributor: Bytes!
+  cid: String!
+  contributedAt_s: BigInt!
 }

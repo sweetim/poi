@@ -1,14 +1,16 @@
 {
-  "name": "graph-learn-zksync-testnet",
+  "name": "poi-graph",
   "license": "UNLICENSED",
   "scripts": {
+    "graph": "graph",
+    "precodegen": "rm abis/* && find ../contract/artifacts-zk/contracts -type f -name \"*.json\" ! -name \"*.dbg.json\" | xargs -I{} cp {} ./abis",
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ graph-learn-zksync-testnet",
-    "create-local": "graph create --node http://localhost:8020/ graph-learn-zksync-testnet",
-    "remove-local": "graph remove --node http://localhost:8020/ graph-learn-zksync-testnet",
+    "deploy": "graph deploy --studio poi",
+    "create-local": "graph create --node http://localhost:8020/ poi-graph",
+    "remove-local": "graph remove --node http://localhost:8020/ poi-graph",
     "predeploy-local": "npm run create-local",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 graph-learn-zksync-testnet",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 poi-graph",
     "test": "graph test"
   },
   "dependencies": {

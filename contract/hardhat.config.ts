@@ -6,7 +6,7 @@ import "@nomicfoundation/hardhat-ethers"
 import "@typechain/hardhat"
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "inMemoryNode",
+  defaultNetwork: "zkSyncSepoliaTestnet",
   networks: {
     zkSyncSepoliaTestnet: {
       url: "https://sepolia.era.zksync.dev",

@@ -5,26 +5,25 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: Greeter.sol:Greeter
+    name: POI
     network: zksync-era-sepolia
     source:
-      address: "0x9Bf50009a404A950ECec066104cE4F9E757E6B83"
-      abi: Greeter.sol:Greeter
-      startBlock: 3409513
+      address: "0x42C44d4a3396814acDDaB332d55C4c3df37F9f52"
+      abi: POI
+      startBlock: 3747580
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - GreetingResetUser
-        - SetGreeting
+        - POIMetadata
+        - POIContributorMetadata
       abis:
-        - name: Greeter.sol:Greeter
-          file: ./abis/Greeter.sol/Greeter.json
+        - name: POI
+          file: ./abis/POI.json
       eventHandlers:
-        - event: GreetingReset(indexed address)
-          handler: handleGreetingResetEvent
-      callHandlers:
-        - function: setGreeting(string)
-          handler: handleSetGreeting
-      file: ./src/contracts-greeter-sol-greeter.ts
+        - event: POIRegister(indexed address,indexed uint256)
+          handler: handlePOIRegister
+        - event: POIContributorAdded(indexed address,indexed uint256,uint256)
+          handler: handlePOIContributorAdded
+      file: ./src/poiHandler.ts
