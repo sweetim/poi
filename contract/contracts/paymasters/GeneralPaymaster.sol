@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "../POI.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import {IPaymaster, ExecutionResult, PAYMASTER_VALIDATION_SUCCESS_MAGIC} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymaster.sol";
 import {IPaymasterFlow} from "@matterlabs/zksync-contracts/l2/system-contracts/interfaces/IPaymasterFlow.sol";
 import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/system-contracts/libraries/TransactionHelper.sol";
@@ -30,6 +32,7 @@ contract GeneralPaymaster is IPaymaster, Ownable {
         returns (bytes4 magic, bytes memory context)
     {
         magic = PAYMASTER_VALIDATION_SUCCESS_MAGIC;
+
         require(
             _transaction.paymasterInput.length >= 4,
             "The standard paymaster input must be at least 4 bytes long"
@@ -38,7 +41,18 @@ contract GeneralPaymaster is IPaymaster, Ownable {
         bytes4 paymasterInputSelector = bytes4(
             _transaction.paymasterInput[0:4]
         );
+
         if (paymasterInputSelector == IPaymasterFlow.general.selector) {
+            bytes4 functionSelector = bytes4(_transaction.data[:4]);
+            require(
+                functionSelector == POI.addContribution.selector,
+                "Unsupported function selector");
+
+            (uint256 _poiDataId, string memory _cid) = abi.decode(
+                _transaction.data[4:],
+                (uint256, string)
+            );
+
             uint256 requiredETH = _transaction.gasLimit *
                 _transaction.maxFeePerGas;
 
@@ -52,6 +66,20 @@ contract GeneralPaymaster is IPaymaster, Ownable {
         } else {
             revert("Unsupported paymaster flow in paymasterParams.");
         }
+    }
+
+    function iToHex(bytes memory buffer) public pure returns (string memory) {
+        // Fixed buffer size for hexadecimal convertion
+        bytes memory converted = new bytes(buffer.length * 2);
+
+        bytes memory _base = "0123456789abcdef";
+
+        for (uint256 i = 0; i < buffer.length; i++) {
+            converted[i * 2] = _base[uint8(buffer[i]) / _base.length];
+            converted[i * 2 + 1] = _base[uint8(buffer[i]) % _base.length];
+        }
+
+        return string(abi.encodePacked("0x", converted));
     }
 
     function postTransaction(

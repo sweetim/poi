@@ -9,9 +9,13 @@ import {
   POIMetadata,
 } from "../generated/schema"
 
+import { BigInt } from "@graphprotocol/graph-ts"
+
 export function handlePOIRegister(event: POIRegister): void {
   const poiContract = POIContract.bind(event.address)
-  const metadata = poiContract.readPOIMetadataById(event.params.id)
+  const metadata = poiContract.readPOIMetadataById(
+    event.params.id.minus(BigInt.fromU32(1)),
+  )
 
   let poiMetadata = new POIMetadata(event.params.id.toHex())
   poiMetadata.owner = event.params.owner

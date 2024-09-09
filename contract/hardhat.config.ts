@@ -3,6 +3,7 @@ import { HardhatUserConfig } from "hardhat/config"
 import "@matterlabs/hardhat-zksync"
 import "@nomicfoundation/hardhat-chai-matchers"
 import "@nomicfoundation/hardhat-ethers"
+import "@nomicfoundation/hardhat-toolbox"
 import "@typechain/hardhat"
 
 const config: HardhatUserConfig = {

@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract POI {
@@ -47,7 +48,11 @@ contract POI {
     mapping(uint => POIData) poiDatas;
 
     event POIRegister(address indexed owner, uint indexed id);
-    event POIContributorAdded(address indexed contributor, uint indexed poiDataId, uint contributorIndex);
+    event POIContributorAdded(
+        address indexed contributor,
+        uint indexed poiDataId,
+        uint contributorIndex
+    );
     event POICompleted(uint indexed poiDataId, bool isComplete);
 
     constructor(IERC20 _poiToken) {
@@ -57,13 +62,13 @@ contract POI {
     function registerPOI(RegisterPOIArgs calldata args) public {
         require(
             poiToken.allowance(msg.sender, address(this)) >= args.reward,
-            "Not enough POI token allowance");
+            "Not enough POI token allowance"
+        );
 
         require(
             poiToken.transferFrom(msg.sender, address(this), args.reward),
-            "Failed to transfer POI token");
-
-        poiToken.approve(msg.sender, args.reward);
+            "Failed to transfer POI token"
+        );
 
         poiDatas[poiDataId].metadata.id = poiDataId;
         poiDatas[poiDataId].metadata.owner = msg.sender;
@@ -80,24 +85,41 @@ contract POI {
         emit POIRegister(msg.sender, poiDataId);
     }
 
-    function readPOIMetadataById(uint id) public view returns (POIMetadata memory) {
+    function readPOIMetadataById(
+        uint id
+    ) public view returns (POIMetadata memory) {
         return poiDatas[id].metadata;
     }
 
     function addContribution(uint _poiDataId, string calldata cid) public {
-        uint contributorIndex = poiDatas[_poiDataId].contributors.contributorIndex;
-        poiDatas[_poiDataId].contributors.records[contributorIndex].contributedAt_s = block.timestamp;
+        uint contributorIndex = poiDatas[_poiDataId]
+            .contributors
+            .contributorIndex;
+        poiDatas[_poiDataId]
+            .contributors
+            .records[contributorIndex]
+            .contributedAt_s = block.timestamp;
         poiDatas[_poiDataId].contributors.records[contributorIndex].cid = cid;
-        poiDatas[_poiDataId].contributors.records[contributorIndex].contributor = msg.sender;
+        poiDatas[_poiDataId]
+            .contributors
+            .records[contributorIndex]
+            .contributor = msg.sender;
 
         poiDatas[_poiDataId].contributors.contributorIndex += 1;
 
         emit POIContributorAdded(msg.sender, _poiDataId, contributorIndex);
     }
 
-    function getAllContributions(uint _poiDataId) public view returns (POIContributorMetadata[] memory) {
-        uint contributorIndex = poiDatas[_poiDataId].contributors.contributorIndex;
-        POIContributorMetadata[] memory contributions = new POIContributorMetadata[](contributorIndex);
+    function getAllContributions(
+        uint _poiDataId
+    ) public view returns (POIContributorMetadata[] memory) {
+        uint contributorIndex = poiDatas[_poiDataId]
+            .contributors
+            .contributorIndex;
+        POIContributorMetadata[]
+            memory contributions = new POIContributorMetadata[](
+                contributorIndex
+            );
 
         for (uint i = 0; i < contributorIndex; i++) {
             contributions[i] = poiDatas[_poiDataId].contributors.records[i];
@@ -108,11 +130,42 @@ contract POI {
 
     function completePOI(uint _poiDataId) public {
         require(
-            msg.sender == poiDatas[_poiDataId].metadata.owner,
-            "Only owner can complete the POI");
+            poiDatas[_poiDataId].depositedToken > 0,
+            "POI is already completed"
+        );
 
+        require(
+            msg.sender == poiDatas[_poiDataId].metadata.owner,
+            "Only owner can complete the POI"
+        );
+
+        uint rewardPerContributor = poiDatas[_poiDataId].reward /
+            poiDatas[_poiDataId].contributors.contributorIndex;
+
+        for (
+            uint i = 0;
+            i < poiDatas[_poiDataId].contributors.contributorIndex;
+            i++
+        ) {
+            address contributor = poiDatas[_poiDataId]
+                .contributors
+                .records[i]
+                .contributor;
+
+            poiToken.transfer(contributor, rewardPerContributor);
+        }
+
+        poiDatas[_poiDataId].depositedToken = 0;
         poiDatas[_poiDataId].isComplete = true;
 
         emit POICompleted(_poiDataId, true);
+    }
+
+    function getPoiTokenBalance(uint _poiDataId) public view returns (uint) {
+        return poiDatas[_poiDataId].depositedToken;
+    }
+
+    function getAllPoiTokenBalance() public view returns (uint) {
+        return poiToken.balanceOf(address(this));
     }
 }

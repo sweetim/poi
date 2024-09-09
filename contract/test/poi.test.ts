@@ -89,9 +89,20 @@ describe("POI", function() {
       ])
   })
 
-  it("should able to complete the poi", async function() {
+  it("should able to complete the poi by owner only", async function() {
     await expect(poiContract.completePOI(poiDataId))
       .to.emit(poiContract, "POICompleted")
       .withArgs(poiDataId, true)
+  })
+
+  it("should able to complete the poi with reward per contributor", async function() {
+    const balance_poiContract = await poiTokenContract.balanceOf(poiContract.getAddress())
+    expect(balance_poiContract).to.equal(0)
+
+    const balance_user1 = await poiTokenContract.balanceOf(user_1.address)
+    expect(balance_user1).to.equal(500)
+
+    const balance_wallet = await poiTokenContract.balanceOf(wallet.address)
+    expect(balance_wallet).to.equal(500)
   })
 })

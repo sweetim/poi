@@ -19,7 +19,7 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: "ipfs:5001"
-      ethereum: "sepolia:https://rpc.sepolia.org"
+      ethereum: "zksync-era-sepolia:https://zksync-sepolia.g.alchemy.com/v2/0vJMNnaIbQ-5F598k5rI7LYI4fZZBYEd"
       GRAPH_LOG: info
   ipfs:
     image: ipfs/kubo:v0.17.0
