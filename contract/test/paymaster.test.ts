@@ -15,16 +15,18 @@ import {
 } from "../typechain-types"
 
 describe("POIPaymaster", function() {
-  let wallet = getWallet(LOCAL_RICH_WALLETS[0].privateKey)
-  let user_1 = getWallet(LOCAL_RICH_WALLETS[1].privateKey)
+  const owner = getWallet(LOCAL_RICH_WALLETS[0].privateKey)
+  const user_1 = getWallet(LOCAL_RICH_WALLETS[1].privateKey)
+  const user_2 = getWallet("0x0000000000000000000000000000000000000000000000000000000000000002")
 
   const poiReward = 1_000
-  const poiDataId = 0
+  const poiDataId_owner = 0
+  const poiDataId_user_1 = 1
   const paymasterInitial_eth = ethers.parseEther("1.0")
 
   let poiContract: POI
   let poiTokenContract: POIToken
-  let generalPaymasterContract: GeneralPaymaster
+  let generalPaymasterContract_owner: GeneralPaymaster
 
   let poiArgs: POI.RegisterPOIArgsStruct = {
     lat: 32123123,
@@ -37,7 +39,7 @@ describe("POIPaymaster", function() {
     poiTokenContract = await deployContract(
       "POIToken",
       [],
-      { wallet, silent: true },
+      { wallet: owner, silent: true },
     ) as any
 
     poiContract = await deployContract(
@@ -45,31 +47,33 @@ describe("POIPaymaster", function() {
       [
         await poiTokenContract.getAddress(),
       ],
-      { wallet, silent: true },
+      { wallet: owner, silent: true },
     ) as any
 
-    generalPaymasterContract = await deployContract(
+    generalPaymasterContract_owner = await deployContract(
       "GeneralPaymaster",
-      [],
-      { wallet, silent: true },
+      [
+        await poiContract.getAddress(),
+      ],
+      { wallet: owner, silent: true },
     ) as any
 
     await (
-      await wallet.sendTransaction({
-        to: await generalPaymasterContract.getAddress(),
+      await owner.sendTransaction({
+        to: await generalPaymasterContract_owner.getAddress(),
         value: paymasterInitial_eth,
       })
     ).wait()
 
-    await poiTokenContract.mint(wallet.address, 100_000)
+    await poiTokenContract.mint(owner.address, 100_000)
     await poiTokenContract.approve(poiContract.getAddress(), 100_000)
-    // await poiContract.registerPOI(poiArgs)
+    await poiContract.registerPOI(poiArgs)
   })
 
   it("should able to sponsor transaction using paymaster", async function() {
     const provider = getProvider()
     const balance_paymaster_before = await provider.getBalance(
-      await generalPaymasterContract.getAddress(),
+      await generalPaymasterContract_owner.getAddress(),
     )
 
     expect(balance_paymaster_before).to.equal(paymasterInitial_eth)
@@ -79,7 +83,7 @@ describe("POIPaymaster", function() {
     )
 
     const paymasterParams = utils.getPaymasterParams(
-      await generalPaymasterContract.getAddress(),
+      await generalPaymasterContract_owner.getAddress(),
       {
         type: "General",
         innerInput: new Uint8Array(),
@@ -87,7 +91,7 @@ describe("POIPaymaster", function() {
     )
 
     await (await poiContract.connect(user_1)
-      .addContribution(poiDataId, "cid_1", {
+      .addContribution(poiDataId_owner, "cid_1", {
         customData: {
           gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
           paymasterParams,
@@ -95,7 +99,7 @@ describe("POIPaymaster", function() {
       })).wait()
 
     const balance_paymaster_after = await provider.getBalance(
-      await generalPaymasterContract.getAddress(),
+      await generalPaymasterContract_owner.getAddress(),
     )
 
     expect(balance_paymaster_before - balance_paymaster_after)
@@ -112,10 +116,10 @@ describe("POIPaymaster", function() {
     const provider = getProvider()
 
     const balance_wallet_before = await provider.getBalance(
-      wallet.address,
+      owner.address,
     )
     const paymasterParams = utils.getPaymasterParams(
-      await generalPaymasterContract.getAddress(),
+      await generalPaymasterContract_owner.getAddress(),
       {
         type: "General",
         innerInput: new Uint8Array(),
@@ -135,9 +139,48 @@ describe("POIPaymaster", function() {
     }
 
     const balance_wallet_after = await provider.getBalance(
-      wallet.address,
+      owner.address,
     )
 
     expect(balance_wallet_after).to.equal(balance_wallet_before)
+  })
+
+  it("should able to sponsor transaction if poi is owned by owner", async function() {
+    const provider = getProvider()
+    const balance_owner_before = await provider.getBalance(
+      owner.address,
+    )
+
+    const balance_user_1_before = await provider.getBalance(
+      user_1.address,
+    )
+
+    const balance_user_2_before = await provider.getBalance(
+      user_2.address,
+    )
+
+    await poiTokenContract.mint(user_1.address, 100_000)
+    await poiTokenContract.connect(user_1).approve(poiContract.getAddress(), 100_000)
+    await poiContract.connect(user_1).registerPOI(poiArgs)
+
+    const paymasterParams = utils.getPaymasterParams(
+      await generalPaymasterContract_owner.getAddress(),
+      {
+        type: "General",
+        innerInput: new Uint8Array(),
+      },
+    )
+
+    try {
+      await (await poiContract.connect(user_2)
+        .addContribution(poiDataId_user_1, "cid_1", {
+          customData: {
+            gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+            paymasterParams,
+          },
+        })).wait()
+    } catch (err) {
+      expect(err.message).to.include("poiDataId is not owned by contract")
+    }
   })
 })

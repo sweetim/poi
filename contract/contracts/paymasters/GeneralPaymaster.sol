@@ -12,6 +12,8 @@ import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract GeneralPaymaster is IPaymaster, Ownable {
+    POI poiContract;
+
     modifier onlyBootloader() {
         require(
             msg.sender == BOOTLOADER_FORMAL_ADDRESS,
@@ -19,6 +21,10 @@ contract GeneralPaymaster is IPaymaster, Ownable {
         );
 
         _;
+    }
+
+    constructor(address _poiContract) {
+        poiContract = POI(_poiContract);
     }
 
     function validateAndPayForPaymasterTransaction(
@@ -33,6 +39,26 @@ contract GeneralPaymaster is IPaymaster, Ownable {
     {
         magic = PAYMASTER_VALIDATION_SUCCESS_MAGIC;
 
+        bytes4 functionSelector = bytes4(_transaction.data[:4]);
+        require(
+            functionSelector == POI.addContribution.selector,
+            "Unsupported function selector"
+        );
+
+        (uint256 _poiDataId, string memory _cid) = abi.decode(
+            _transaction.data[4:],
+            (uint256, string)
+        );
+
+        address poiDataId_owner = poiContract
+            .readPOIMetadataById(_poiDataId)
+            .owner;
+
+        require(
+            poiDataId_owner == owner(),
+            "poiDataId is not owned by contract"
+        );
+
         require(
             _transaction.paymasterInput.length >= 4,
             "The standard paymaster input must be at least 4 bytes long"
@@ -42,44 +68,21 @@ contract GeneralPaymaster is IPaymaster, Ownable {
             _transaction.paymasterInput[0:4]
         );
 
-        if (paymasterInputSelector == IPaymasterFlow.general.selector) {
-            bytes4 functionSelector = bytes4(_transaction.data[:4]);
-            require(
-                functionSelector == POI.addContribution.selector,
-                "Unsupported function selector");
+        require(
+            paymasterInputSelector == IPaymasterFlow.general.selector,
+            "Unsupported paymaster flow in paymasterParams."
+        );
 
-            (uint256 _poiDataId, string memory _cid) = abi.decode(
-                _transaction.data[4:],
-                (uint256, string)
-            );
+        uint256 requiredETH = _transaction.gasLimit * _transaction.maxFeePerGas;
 
-            uint256 requiredETH = _transaction.gasLimit *
-                _transaction.maxFeePerGas;
+        (bool success, ) = payable(BOOTLOADER_FORMAL_ADDRESS).call{
+            value: requiredETH
+        }("");
 
-            (bool success, ) = payable(BOOTLOADER_FORMAL_ADDRESS).call{
-                value: requiredETH
-            }("");
-            require(
-                success,
-                "Failed to transfer tx fee to the Bootloader. Paymaster balance might not be enough."
-            );
-        } else {
-            revert("Unsupported paymaster flow in paymasterParams.");
-        }
-    }
-
-    function iToHex(bytes memory buffer) public pure returns (string memory) {
-        // Fixed buffer size for hexadecimal convertion
-        bytes memory converted = new bytes(buffer.length * 2);
-
-        bytes memory _base = "0123456789abcdef";
-
-        for (uint256 i = 0; i < buffer.length; i++) {
-            converted[i * 2] = _base[uint8(buffer[i]) / _base.length];
-            converted[i * 2 + 1] = _base[uint8(buffer[i]) % _base.length];
-        }
-
-        return string(abi.encodePacked("0x", converted));
+        require(
+            success,
+            "Failed to transfer tx fee to the Bootloader. Paymaster balance might not be enough."
+        );
     }
 
     function postTransaction(
